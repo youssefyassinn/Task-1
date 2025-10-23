@@ -1,0 +1,31 @@
+#include <iostream>
+using namespace std;
+
+void RestrictedHanoi(int n, char source, char aux, char dest) {
+    if (n == 1) {
+        cout << "Move disk 1 from " << source << " to " << aux << endl;
+        cout << "Move disk 1 from " << aux << " to " << dest << endl;
+        return;
+    }
+
+    RestrictedHanoi(n - 1, source, dest, aux);
+
+    cout << "Move disk " << n << " from " << source << " to " << aux << endl;
+
+    RestrictedHanoi(n - 1, aux, source, dest);
+
+    cout << "Move disk " << n << " from " << aux << " to " << dest << endl;
+}
+
+int main() {
+    int n;
+    cout << "Enter the number of disks: ";
+    cin >> n;
+
+    cout << "\nSequence of moves:\n";
+    RestrictedHanoi(n, 'A', 'B', 'C');
+
+    cout << "\nTotal moves: " << (1 << n) << endl;
+
+    return 0;
+}
