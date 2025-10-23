@@ -2,7 +2,6 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
-#include <fstream>
 #include <iomanip>
 #include <cstdlib>
 using namespace std;
@@ -75,12 +74,6 @@ vector<int> generate_random_array(int n) {
 void test_comparisons() {
     srand(time(nullptr));
 
-    ofstream file_comp("comparisons.csv");
-    ofstream file_time("execution_time.csv");
-
-    file_comp << "ArrayType,Size,Bubble,Selection,Insertion\n";
-    file_time << "ArrayType,Size,Bubble,Selection,Insertion\n";
-
     cout << fixed << setprecision(6);
 
     for (int n = 1; n <= 30; n++) {
@@ -122,20 +115,8 @@ void test_comparisons() {
             cout << "Bubble sort: " << c_bubble << " comparisons, " << t_bubble << " s\n";
             cout << "Selection sort: " << c_selection << " comparisons, " << t_selection << " s\n";
             cout << "Insertion sort: " << c_insertion << " comparisons, " << t_insertion << " s\n";
-
-            // Write to CSV
-            file_comp << type << "," << n << ","
-                      << c_bubble << "," << c_selection << "," << c_insertion << "\n";
-            file_time << type << "," << n << ","
-                      << t_bubble << "," << t_selection << "," << t_insertion << "\n";
         }
     }
-
-    file_comp.close();
-    file_time.close();
-
-    cout << "\nResults saved to 'comparisons.csv' and 'execution_time.csv'."
-         << "\nYou can open these in Excel and plot the results.\n";
 }
 
 // --------------------------------------------------
