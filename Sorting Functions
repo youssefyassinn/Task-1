@@ -1,0 +1,148 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <fstream>
+#include <iomanip>
+#include <cstdlib>
+using namespace std;
+
+// --------------------------------------------------
+// Sorting algorithms with comparison counting
+// --------------------------------------------------
+
+int bubble_sort_count(vector<int> arr) {
+    int n = arr.size();
+    int count = 0;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            count++;
+            if (arr[j] > arr[j + 1])
+                swap(arr[j], arr[j + 1]);
+        }
+    }
+    return count;
+}
+
+int selection_sort_count(vector<int> arr) {
+    int n = arr.size();
+    int count = 0;
+    for (int i = 0; i < n - 1; i++) {
+        int min_idx = i;
+        for (int j = i + 1; j < n; j++) {
+            count++;
+            if (arr[j] < arr[min_idx])
+                min_idx = j;
+        }
+        swap(arr[i], arr[min_idx]);
+    }
+    return count;
+}
+
+int insertion_sort_count(vector<int> arr) {
+    int n = arr.size();
+    int count = 0;
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0) {
+            count++;
+            if (arr[j] > key) {
+                arr[j + 1] = arr[j];
+                j--;
+            } else break;
+        }
+        arr[j + 1] = key;
+    }
+    return count;
+}
+
+// --------------------------------------------------
+// Helper: Generate arrays
+// --------------------------------------------------
+
+vector<int> generate_random_array(int n) {
+    vector<int> arr(n);
+    for (int i = 0; i < n; i++)
+        arr[i] = rand() % 1000;
+    return arr;
+}
+
+// --------------------------------------------------
+// Main test function
+// --------------------------------------------------
+
+void test_comparisons() {
+    srand(time(nullptr));
+
+    ofstream file_comp("comparisons.csv");
+    ofstream file_time("execution_time.csv");
+
+    file_comp << "ArrayType,Size,Bubble,Selection,Insertion\n";
+    file_time << "ArrayType,Size,Bubble,Selection,Insertion\n";
+
+    cout << fixed << setprecision(6);
+
+    for (int n = 1; n <= 30; n++) {
+        cout << "\nArray size: " << n << endl;
+
+        vector<int> random_arr = generate_random_array(n);
+        vector<int> sorted_arr = random_arr;
+        vector<int> reversed_arr = random_arr;
+        sort(sorted_arr.begin(), sorted_arr.end());
+        sort(reversed_arr.begin(), reversed_arr.end(), greater<int>());
+
+        vector<pair<string, vector<int>>> test_cases = {
+            {"Random", random_arr},
+            {"Sorted", sorted_arr},
+            {"Reversed", reversed_arr}
+        };
+
+        for (auto &[type, arr] : test_cases) {
+            cout << "\n--- " << type << " array ---" << endl;
+
+            // Bubble Sort
+            auto start = chrono::high_resolution_clock::now();
+            int c_bubble = bubble_sort_count(arr);
+            auto end = chrono::high_resolution_clock::now();
+            double t_bubble = chrono::duration<double>(end - start).count();
+
+            // Selection Sort
+            start = chrono::high_resolution_clock::now();
+            int c_selection = selection_sort_count(arr);
+            end = chrono::high_resolution_clock::now();
+            double t_selection = chrono::duration<double>(end - start).count();
+
+            // Insertion Sort
+            start = chrono::high_resolution_clock::now();
+            int c_insertion = insertion_sort_count(arr);
+            end = chrono::high_resolution_clock::now();
+            double t_insertion = chrono::duration<double>(end - start).count();
+
+            cout << "Bubble sort: " << c_bubble << " comparisons, " << t_bubble << " s\n";
+            cout << "Selection sort: " << c_selection << " comparisons, " << t_selection << " s\n";
+            cout << "Insertion sort: " << c_insertion << " comparisons, " << t_insertion << " s\n";
+
+            // Write to CSV
+            file_comp << type << "," << n << ","
+                      << c_bubble << "," << c_selection << "," << c_insertion << "\n";
+            file_time << type << "," << n << ","
+                      << t_bubble << "," << t_selection << "," << t_insertion << "\n";
+        }
+    }
+
+    file_comp.close();
+    file_time.close();
+
+    cout << "\nResults saved to 'comparisons.csv' and 'execution_time.csv'."
+         << "\nYou can open these in Excel and plot the results.\n";
+}
+
+// --------------------------------------------------
+// Main
+// --------------------------------------------------
+
+int main() {
+    test_comparisons();
+    return 0;
+}
