@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
+#include <fstream>
 #include <iomanip>
 #include <cstdlib>
 using namespace std;
@@ -74,14 +75,21 @@ vector<int> generate_random_array(int n) {
 void test_comparisons() {
     srand(time(nullptr));
 
-    cout << fixed << setprecision(6);
+    ofstream fout("results.csv");
+    fout << fixed << setprecision(3); // 3 decimals for microseconds
+
+    fout << "ArrayType,Size,BubbleComparisons,SelectionComparisons,InsertionComparisons,"
+         << "BubbleTime_us,SelectionTime_us,InsertionTime_us\n";
+
+    cout << fixed << setprecision(3);
+
+    const int repetitions = 1000; // repeat sorts for small arrays to get accurate timing
 
     for (int n = 1; n <= 30; n++) {
-        cout << "\nArray size: " << n << endl;
-
         vector<int> random_arr = generate_random_array(n);
         vector<int> sorted_arr = random_arr;
         vector<int> reversed_arr = random_arr;
+
         sort(sorted_arr.begin(), sorted_arr.end());
         sort(reversed_arr.begin(), reversed_arr.end(), greater<int>());
 
@@ -92,31 +100,45 @@ void test_comparisons() {
         };
 
         for (auto &[type, arr] : test_cases) {
-            cout << "\n--- " << type << " array ---" << endl;
-
             // Bubble Sort
             auto start = chrono::high_resolution_clock::now();
-            int c_bubble = bubble_sort_count(arr);
+            int c_bubble = 0;
+            for (int r = 0; r < repetitions; r++)
+                c_bubble = bubble_sort_count(arr);
             auto end = chrono::high_resolution_clock::now();
-            double t_bubble = chrono::duration<double>(end - start).count();
+            double t_bubble = chrono::duration<double, micro>(end - start).count() / repetitions;
 
             // Selection Sort
             start = chrono::high_resolution_clock::now();
-            int c_selection = selection_sort_count(arr);
+            int c_selection = 0;
+            for (int r = 0; r < repetitions; r++)
+                c_selection = selection_sort_count(arr);
             end = chrono::high_resolution_clock::now();
-            double t_selection = chrono::duration<double>(end - start).count();
+            double t_selection = chrono::duration<double, micro>(end - start).count() / repetitions;
 
             // Insertion Sort
             start = chrono::high_resolution_clock::now();
-            int c_insertion = insertion_sort_count(arr);
+            int c_insertion = 0;
+            for (int r = 0; r < repetitions; r++)
+                c_insertion = insertion_sort_count(arr);
             end = chrono::high_resolution_clock::now();
-            double t_insertion = chrono::duration<double>(end - start).count();
+            double t_insertion = chrono::duration<double, micro>(end - start).count() / repetitions;
 
-            cout << "Bubble sort: " << c_bubble << " comparisons, " << t_bubble << " s\n";
-            cout << "Selection sort: " << c_selection << " comparisons, " << t_selection << " s\n";
-            cout << "Insertion sort: " << c_insertion << " comparisons, " << t_insertion << " s\n";
+            // Console output
+            cout << type << " array, size " << n << ":\n";
+            cout << "  Bubble sort:   " << c_bubble << " comparisons, " << t_bubble << " us\n";
+            cout << "  Selection sort:" << c_selection << " comparisons, " << t_selection << " us\n";
+            cout << "  Insertion sort:" << c_insertion << " comparisons, " << t_insertion << " us\n\n";
+
+            // Write to CSV
+            fout << type << "," << n << ","
+                 << c_bubble << "," << c_selection << "," << c_insertion << ","
+                 << t_bubble << "," << t_selection << "," << t_insertion << "\n";
         }
     }
+
+    fout.close();
+    cout << "Results saved to 'results.csv'. Timings are now in microseconds and non-zero.\n";
 }
 
 // --------------------------------------------------
@@ -127,3 +149,4 @@ int main() {
     test_comparisons();
     return 0;
 }
+
