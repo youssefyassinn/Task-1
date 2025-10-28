@@ -70,7 +70,7 @@ void test_comparisons() {
     srand(time(nullptr));
 
     ofstream fout("results.csv");
-    fout << fixed << setprecision(3); // 3 decimals for microseconds
+    fout << fixed << setprecision(3); 
 
     fout << "ArrayType,Size,BubbleComparisons,SelectionComparisons,InsertionComparisons,"
          << "BubbleTime_us,SelectionTime_us,InsertionTime_us\n";
