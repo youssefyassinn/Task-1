@@ -94,7 +94,6 @@ void test_comparisons() {
         };
 
         for (auto &[type, arr] : test_cases) {
-            // Bubble Sort
             auto start = chrono::high_resolution_clock::now();
             int c_bubble = 0;
             for (int r = 0; r < repetitions; r++)
