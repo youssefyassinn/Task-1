@@ -77,7 +77,7 @@ void test_comparisons() {
 
     cout << fixed << setprecision(3);
 
-    const int repetitions = 1000; // repeat sorts for small arrays to get accurate timing
+    const int repetitions = 1000; 
 
     for (int n = 1; n <= 30; n++) {
         vector<int> random_arr = generate_random_array(n);
