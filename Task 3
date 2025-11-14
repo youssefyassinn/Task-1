@@ -1,0 +1,130 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+class Node {
+public:
+    string key;
+    Node* left;
+    Node* right;
+    int height;
+    Node(string k) {
+        key = k;
+        left = NULL;
+        right = NULL;
+        height = 1;
+    }
+};
+
+int getHeight(Node* n) {
+    if (n == NULL) return 0;
+    return n->height;
+}
+
+Node* rightRotate(Node* y) {
+    Node* x = y->left;
+    Node* T2 = x->right;
+
+    x->right = y;
+    y->left = T2;
+
+    y->height = 1 + (getHeight(y->left) > getHeight(y->right) ? getHeight(y->left) : getHeight(y->right));
+    x->height = 1 + (getHeight(x->left) > getHeight(x->right) ? getHeight(x->left) : getHeight(x->right));
+
+    return x;
+}
+
+Node* leftRotate(Node* x) {
+    Node* y = x->right;
+    Node* T2 = y->left;
+
+    y->left = x;
+    x->right = T2;
+
+    x->height = 1 + (getHeight(x->left) > getHeight(x->right) ? getHeight(x->left) : getHeight(x->right));
+    y->height = 1 + (getHeight(y->left) > getHeight(y->right) ? getHeight(y->left) : getHeight(y->right));
+
+    return y;
+}
+
+Node* insert(Node* node, string key) {
+    if (node == NULL) return new Node(key);
+
+    if (key < node->key)
+        node->left = insert(node->left, key);
+    else if (key > node->key)
+        node->right = insert(node->right, key);
+    else
+        return node;
+
+    int hl = getHeight(node->left);
+    int hr = getHeight(node->right);
+    node->height = 1 + (hl > hr ? hl : hr);
+
+    int balance = hr - hl;
+
+    if (balance < -1 && key < node->left->key)
+        return rightRotate(node);
+    if (balance > 1 && key > node->right->key)
+        return leftRotate(node);
+    if (balance < -1 && key > node->left->key) {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+    if (balance > 1 && key < node->right->key) {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+
+bool startsWith(string word, string prefix) {
+    if (prefix.length() > word.length()) return false;
+    for (int i = 0; i < prefix.length(); i++) {
+        if (word[i] != prefix[i])
+            return false;
+    }
+    return true;
+}
+
+void FIND_ALL_WITH_PREFIX(Node* root, string prefix) {
+    if (root == NULL) return;
+
+    if (startsWith(root->key, prefix))
+        cout << root->key << endl;
+
+    if (root->key >= prefix)
+        FIND_ALL_WITH_PREFIX(root->left, prefix);
+
+    string upper = prefix;
+    if (upper.length() > 0)
+        upper[upper.length() - 1]++;
+
+    if (root->key < upper)
+        FIND_ALL_WITH_PREFIX(root->right, prefix);
+}
+
+int main() {
+    Node* root = NULL;
+
+    ifstream file("dictionary.txt");
+
+    string w;
+    while (file >> w) {
+        root = insert(root, w);
+    }
+
+    string prefix;
+    while (true) {
+        cout << "Enter prefix (or ENTER to quit): ";
+        getline(cin, prefix);
+        if (prefix == "")
+            break;
+
+        FIND_ALL_WITH_PREFIX(root, prefix);
+    }
+
+    return 0;
+}
